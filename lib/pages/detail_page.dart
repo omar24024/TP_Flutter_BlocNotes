@@ -1,10 +1,3 @@
-// lib/pages/detail_page.dart
-//
-// PARTIE 2 — Refactorisée avec Provider.
-// • Lit la note depuis NoteService (se synchronise automatiquement).
-// • Suppression et modification passent par le service.
-// • Plus besoin de retourner 'deleted' / note_modifiée à HomePage.
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/note.dart';
@@ -12,213 +5,88 @@ import '../services/note_service.dart';
 import 'create_page.dart';
 
 class DetailNotePage extends StatelessWidget {
-  /// On passe l'id plutôt que la note entière pour toujours lire l'état frais.
   final Note note;
 
   const DetailNotePage({super.key, required this.note});
 
-  // ─────────────────────────────────────────────
-  //  Helpers
-  // ─────────────────────────────────────────────
-
-  Color _hexToColor(String hex) {
-    final h = hex.replaceFirst('#', '');
-    return Color(int.parse('FF$h', radix: 16));
-  }
-
-  String _formatDateComplete(DateTime date) {
-    const jours = [
-      '', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'
-    ];
-    const mois = [
-      '', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
-    ];
-    final h = date.hour.toString().padLeft(2, '0');
-    final m = date.minute.toString().padLeft(2, '0');
-    return '${jours[date.weekday]} ${date.day} ${mois[date.month]} ${date.year} à $h:$m';
-  }
-
-  // ─────────────────────────────────────────────
-  //  Actions
-  // ─────────────────────────────────────────────
-
-  void _ouvrirModification(BuildContext context, Note noteActuelle) {
+  void _edit(BuildContext context, Note n) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CreateNotePage(noteExistante: noteActuelle),
+        builder: (_) => CreateNotePage(noteExistante: n),
       ),
     );
   }
 
-  Future<void> _confirmerSuppression(
-      BuildContext context, Note noteActuelle) async {
-    final bool? confirme = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer la note ?'),
-        content: Text(
-          'Êtes-vous sûr de vouloir supprimer « ${noteActuelle.titre} » ?\nCette action est irréversible.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Supprimer'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirme == true && context.mounted) {
-      // Suppression dans le service — HomePage se reconstruit tout seul
-      context.read<NoteService>().supprimerNote(noteActuelle.id);
-      Navigator.pop(context);
-    }
+  void _delete(BuildContext context, Note n) {
+    context.read<NoteService>().supprimerNote(n.id);
+    Navigator.pop(context);
   }
-
-  // ─────────────────────────────────────────────
-  //  Build
-  // ─────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    // Consumer<NoteService> pour refléter les modifications en temps réel.
-    // On relit la note par id au cas où elle aurait été modifiée.
     return Consumer<NoteService>(
       builder: (context, service, _) {
-        // Si la note a été supprimée depuis une autre route, on revient.
-        final noteActuelle = service.trouverParId(note.id) ?? note;
-
-        final couleur = _hexToColor(noteActuelle.couleur);
-        final estCouleurSombre = couleur.computeLuminance() < 0.5;
-        final couleurTexteAppBar =
-            estCouleurSombre ? Colors.white : Colors.black87;
+        final n = service.trouverParId(note.id) ?? note;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF5F5F5),
           appBar: AppBar(
-            backgroundColor: couleur,
-            foregroundColor: couleurTexteAppBar,
-            elevation: 0,
-            title: Text(
-              'Détail',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: couleurTexteAppBar),
-            ),
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: couleurTexteAppBar),
-              onPressed: () => Navigator.pop(context),
-            ),
+            title: Text(n.titre),
             actions: [
               IconButton(
-                onPressed: () =>
-                    _ouvrirModification(context, noteActuelle),
-                icon: Icon(Icons.edit, color: couleurTexteAppBar),
-                tooltip: 'Modifier',
+                icon: const Icon(Icons.edit),
+                onPressed: () => _edit(context, n),
               ),
               IconButton(
-                onPressed: () =>
-                    _confirmerSuppression(context, noteActuelle),
-                icon: Icon(Icons.delete_outline,
-                    color: couleurTexteAppBar),
-                tooltip: 'Supprimer',
+                icon: const Icon(Icons.delete),
+                onPressed: () => _delete(context, n),
               ),
             ],
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Bandeau de couleur ──────────────────────
+                // couleur simple
                 Container(
-                  height: 6,
+                  height: 5,
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: couleur,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
+                  color: Colors.blue,
                 ),
-                const SizedBox(height: 20),
 
-                // ── Titre ───────────────────────────────────
+                const SizedBox(height: 15),
+
+                // titre
                 Text(
-                  noteActuelle.titre,
+                  n.titre,
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    height: 1.3,
                   ),
                 ),
+
                 const SizedBox(height: 10),
 
-                // ── Date de création ────────────────────────
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today,
-                        size: 14, color: Colors.grey[500]),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Créée le ${_formatDateComplete(noteActuelle.dateCreation)}',
-                      style: TextStyle(
-                          fontSize: 12, color: Colors.grey[500]),
-                    ),
-                  ],
+                // contenu
+                Text(
+                  n.contenu.isEmpty ? 'Aucun contenu' : n.contenu,
+                  style: const TextStyle(fontSize: 16),
                 ),
 
-                // ── Date de modification ────────────────────
-                if (noteActuelle.dateModification != null) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.edit_calendar,
-                          size: 14, color: Colors.grey[400]),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Modifiée le ${_formatDateComplete(noteActuelle.dateModification!)}',
-                        style: TextStyle(
-                            fontSize: 12, color: Colors.grey[400]),
-                      ),
-                    ],
-                  ),
-                ],
+                const Spacer(),
 
-                const SizedBox(height: 24),
-                const Divider(),
-                const SizedBox(height: 16),
-
-                // ── Contenu complet ─────────────────────────
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE0E0E0)),
-                  ),
-                  child: Text(
-                    noteActuelle.contenu.isEmpty
-                        ? '(Aucun contenu)'
-                        : noteActuelle.contenu,
-                    style: TextStyle(
-                      fontSize: 16,
-                      height: 1.6,
-                      color: noteActuelle.contenu.isEmpty
-                          ? Colors.grey[400]
-                          : Colors.black87,
-                    ),
-                  ),
+                // dates simples
+                Text(
+                  'Créée: ${n.dateCreation}',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
+
+                if (n.dateModification != null)
+                  Text(
+                    'Modifiée: ${n.dateModification}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
               ],
             ),
           ),

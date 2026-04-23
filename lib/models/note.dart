@@ -15,7 +15,6 @@ class Note {
     this.dateModification,
   });
 
-  /// Crée une copie modifiée de la note
   Note copyWith({
     String? titre,
     String? contenu,
