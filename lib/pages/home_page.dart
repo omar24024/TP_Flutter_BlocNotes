@@ -30,14 +30,20 @@ class HomePage extends StatelessWidget {
         actions: [
           Consumer<NoteService>(
             builder: (_, s, __) => Center(
-              child: Text('${s.nombreNotes}'),
+              child: Text(
+                '${s.nombreNotes}',
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 16),
         ],
       ),
+
       body: Column(
         children: [
+          // 🔍 Search
           Padding(
             padding: const EdgeInsets.all(8),
             child: TextField(
@@ -50,7 +56,7 @@ class HomePage extends StatelessWidget {
             ),
           ),
 
-          // LIST
+          // 📋 Notes list
           Expanded(
             child: Consumer<NoteService>(
               builder: (context, service, _) {
@@ -65,14 +71,39 @@ class HomePage extends StatelessWidget {
                   itemBuilder: (_, i) {
                     final n = notes[i];
 
-                    return ListTile(
-                      title: Text(n.titre),
-                      subtitle: Text(
-                        n.contenu,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    // 🎨 تحويل كود اللون النصي إلى لون حقيقي في فلاتر
+                    // في حالة كان اللون فارغاً أو به خطأ، نستخدم لوناً افتراضياً
+                    Color noteColor;
+                    try {
+                      noteColor =
+                          Color(int.parse(n.couleur.replaceAll('#', '0xFF')));
+                    } catch (e) {
+                      noteColor = Colors.blue.shade50; // لون احتياطي
+                    }
+
+                    return Card(
+                      elevation: 3,
+                      color:
+                          noteColor, // 👈 هنا استخدمنا اللون الديناميكي للملاحظة
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      onTap: () => _openDetail(context, n),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 10,
+                      ),
+                      child: ListTile(
+                        title: Text(
+                          n.titre,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          n.contenu,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () => _openDetail(context, n),
+                      ),
                     );
                   },
                 );
@@ -81,6 +112,8 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+
+      // ➕ Add button
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openCreate(context),
         child: const Icon(Icons.add),

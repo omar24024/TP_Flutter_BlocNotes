@@ -5,8 +5,6 @@ class NoteService extends ChangeNotifier {
   final List<Note> _notes = [];
   String _search = '';
 
-  // ── GETTERS ──
-
   List<Note> get notes => _notes;
 
   List<Note> get notesFiltrees {
@@ -21,8 +19,6 @@ class NoteService extends ChangeNotifier {
   int get nombreNotes => _notes.length;
 
   String get recherche => _search;
-
-  // ── CRUD ──
 
   void ajouterNote(Note note) {
     _notes.add(note);
@@ -48,8 +44,6 @@ class NoteService extends ChangeNotifier {
     }
     return null;
   }
-
-  // ── SEARCH ──
 
   void changerRecherche(String v) {
     _search = v;

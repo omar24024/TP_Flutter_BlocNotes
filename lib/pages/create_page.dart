@@ -92,7 +92,6 @@ class _CreateNotePageState extends State<CreateNotePage> {
           key: _formKey,
           child: Column(
             children: [
-              // ── TITRE ──
               TextFormField(
                 controller: titreCtrl,
                 decoration: const InputDecoration(
@@ -102,10 +101,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
                 validator: (v) =>
                     v == null || v.isEmpty ? 'Champ obligatoire' : null,
               ),
-
               const SizedBox(height: 10),
-
-              // ── CONTENU ──
               TextFormField(
                 controller: contenuCtrl,
                 maxLines: 4,
@@ -114,10 +110,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
                   border: OutlineInputBorder(),
                 ),
               ),
-
               const SizedBox(height: 15),
-
-              // ── COULEURS (UX simple mais propre) ──
               Row(
                 children: colors.map((c) {
                   final selected = c == couleur;
@@ -140,10 +133,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
                   );
                 }).toList(),
               ),
-
               const Spacer(),
-
-              // ── BOUTON ──
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

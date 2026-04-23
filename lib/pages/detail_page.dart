@@ -48,16 +48,12 @@ class DetailNotePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // couleur simple
                 Container(
                   height: 5,
                   width: double.infinity,
                   color: Colors.blue,
                 ),
-
                 const SizedBox(height: 15),
-
-                // titre
                 Text(
                   n.titre,
                   style: const TextStyle(
@@ -65,23 +61,16 @@ class DetailNotePage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
-                // contenu
                 Text(
                   n.contenu.isEmpty ? 'Aucun contenu' : n.contenu,
                   style: const TextStyle(fontSize: 16),
                 ),
-
                 const Spacer(),
-
-                // dates simples
                 Text(
                   'Créée: ${n.dateCreation}',
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-
                 if (n.dateModification != null)
                   Text(
                     'Modifiée: ${n.dateModification}',
